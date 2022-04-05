@@ -1,4 +1,4 @@
-package Operators;
+package day2_Operators;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;

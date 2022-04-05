@@ -1,4 +1,4 @@
-package Operators;
+package day2_Operators;
 
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
@@ -7,7 +7,6 @@ import org.reactivestreams.Subscription;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;

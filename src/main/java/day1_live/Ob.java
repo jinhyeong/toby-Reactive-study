@@ -1,4 +1,4 @@
-package live;
+package day1_live;
 
 import java.util.Iterator;
 
