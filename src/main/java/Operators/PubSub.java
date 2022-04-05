@@ -36,8 +36,8 @@ public class PubSub {
 
 		// 데이터를 보내는거
 		Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
-//		Publisher<Integer> mapPub = mapPub(pub, (Function<Integer, Integer>) s -> s * 10);
-//		Publisher<Integer> map2Pub = mapPub(mapPub, (Function<Integer, Integer>) s -> -s);
+		//		Publisher<Integer> mapPub = mapPub(pub, (Function<Integer, Integer>) s -> s * 10);
+		//		Publisher<Integer> map2Pub = mapPub(mapPub, (Function<Integer, Integer>) s -> -s);
 		Publisher<Integer> sumPub = sumPub(pub);
 
 		// 퍼블리셔 부터 4개 메서드 종류의 데이터를 받는다
@@ -46,7 +46,28 @@ public class PubSub {
 		sumPub.subscribe(sub);
 	}
 
+	private static Publisher<Integer> sumPub(Publisher<Integer> pub) {
+		return new Publisher<Integer>() {
+			@Override
+			public void subscribe(Subscriber<? super Integer> s) {
+				pub.subscribe(new DelegateSub(s) {
+					int sum = 0;
+					@Override
+					public void onNext(Integer integer) {
+						sum += integer;
 
+						// 완료 시점은 onComplete 로 알 수 있다.
+					}
+
+					@Override
+					public void onComplete() {
+						s.onNext(sum);
+						s.onComplete();
+					}
+				});
+			}
+		};
+	}
 
 	private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f) {
 		return new Publisher<Integer>() {
