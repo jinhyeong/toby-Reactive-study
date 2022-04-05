@@ -6,6 +6,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +23,12 @@ import static java.util.stream.Collectors.toList;
  * Publisher -> Data1 -> Operator1(가공) -> [Data2] -> Operator2 -> [Data3] -> Subscriber
  *
  * 1. map(d1 -> function -> d2)
+ * Publisher -> Data1 -> mapPub -> [Data2] -> logSub
+ *                       <- subscribe(logSub)
+ *                       -> onSubscribe(s)
+ *                       -> onNext
+ *                       -> onNext
+ *                       -> onComplete
  */
 @Slf4j
 public class PubSub {
@@ -29,11 +36,21 @@ public class PubSub {
 
 		// 데이터를 보내는거
 		Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
+		Publisher<Integer> mapPub = mapPub(pub, (Function<Integer, Integer>)s -> s );
 
 		// 퍼블리셔 부터 4개 메서드 종류의 데이터를 받는다
 		Subscriber<Integer> sub = logSub();
 
-		pub.subscribe(sub);
+		mapPub.subscribe(sub);
+	}
+
+	private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> integerIntegerFunction) {
+		return new Publisher<Integer>() {
+			@Override
+			public void subscribe(Subscriber<? super Integer> sub) {
+				pub.subscribe(sub);
+			}
+		};
 	}
 
 	private static Subscriber<Integer> logSub() {
