@@ -36,7 +36,7 @@ public class PubSub {
 
 		// 데이터를 보내는거
 		Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
-		Publisher<Integer> mapPub = mapPub(pub, (Function<Integer, Integer>)s -> s );
+		Publisher<Integer> mapPub = mapPub(pub, (Function<Integer, Integer>)s -> s * 10 );
 
 		// 퍼블리셔 부터 4개 메서드 종류의 데이터를 받는다
 		Subscriber<Integer> sub = logSub();
@@ -44,11 +44,31 @@ public class PubSub {
 		mapPub.subscribe(sub);
 	}
 
-	private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> integerIntegerFunction) {
+	private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f) {
 		return new Publisher<Integer>() {
 			@Override
 			public void subscribe(Subscriber<? super Integer> sub) {
-				pub.subscribe(sub);
+				pub.subscribe(new Subscriber<Integer>() {
+					@Override
+					public void onSubscribe(Subscription s) {
+						sub.onSubscribe(s);
+					}
+
+					@Override
+					public void onNext(Integer integer) {
+						sub.onNext(f.apply(integer));
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						sub.onError(t);
+					}
+
+					@Override
+					public void onComplete() {
+						sub.onComplete();
+					}
+				});
 			}
 		};
 	}
